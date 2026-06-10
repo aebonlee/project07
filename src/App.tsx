@@ -48,6 +48,55 @@ const M: Meta = {
     { title: 'Web Speech 오디오', body: 'ko-KR 음성을 선택해 해설을 순차 낭독하고, 현재 읽는 단락을 상태로 관리합니다.' },
     { title: '정적·오프라인', body: '내장 문화재 DB로 키 없이도 동작하며 localStorage 도록으로 관람 기록을 보존합니다.' },
   ],
+  targets: ['문화재를 더 깊이 이해하고 싶은 관람객', '아이와 함께 답사하는 가족', '전시·답사 해설이 필요한 사람'],
+  goals: [
+    '문화재를 시대·해설·일화·용어·관람팁으로 구성해 안내한다',
+    '아동/일반/전문 수준으로 같은 대상을 다르게 설명한다',
+    'API 키가 없어도 내장 문화재 DB로 동작하게 한다',
+  ],
+  scenarios: [
+    '분류·시대·청중 수준을 고르고 문화재명을 입력해 해설을 받는다',
+    '오디오 가이드(TTS)로 해설을 들으며 관람한다',
+    '둘러본 문화재를 도록에 저장한다',
+  ],
+  screens: [
+    { name: '대상 선택', desc: '분류·시대·청중 수준·문화재명 입력' },
+    { name: '도슨트 해설', desc: '요약·시대·섹션 해설·흥미로운 사실·관람 팁' },
+    { name: '용어 풀이', desc: '어려운 용어를 쉬운 말로 정리한 용어집' },
+    { name: '오디오 가이드', desc: '해설을 한국어 음성(TTS)으로 낭독' },
+    { name: '관람 기록 (도록)', desc: '둘러본 문화재를 저장해 나만의 도록' },
+  ],
+  pipelineDetail: [
+    { step: '대상 선택', detail: '분류·시대·청중 수준·문화재명을 구조화한다.' },
+    { step: '해설 합성 · 스키마 강제', detail: '청중 수준별 어휘 규칙과 한국 문화재 맥락을 system 프롬프트로 지시하고 JSON 스키마를 고정한다.' },
+    { step: 'GPT 호출(json_object)', detail: 'json_object로 해설·일화·용어·관람팁을 한 번에 수신한다.' },
+    { step: '검증 · 폴백', detail: '누락 시 내장 문화재 DB로 안전 해설한다.' },
+    { step: '관람', detail: '섹션 해설 + 용어집 + Web Speech 오디오 가이드.' },
+    { step: '기록', detail: '둘러본 문화재를 localStorage(heritage.visited) 도록에 저장한다.' },
+  ],
+  promptNotes: [
+    '청중(아동/일반/전문)에 따라 system 프롬프트의 어휘·깊이 규칙을 바꿔 같은 대상도 다른 해설을 만든다.',
+    '요약·섹션·일화·용어·관람팁을 하나의 json_object 스키마로 강제해 일관된 도슨트 포맷을 받는다.',
+    'API 키가 없으면 내장 문화재 DB로 동일 구조의 해설을 제공한다.',
+  ],
+  architecture:
+    '백엔드 없는 React SPA. 공통 레이아웃·5탭은 src/ui.tsx, 해설 기능은 src/App.tsx가 담당한다. ' +
+    'OpenAI 호출은 src/lib/ai.ts, 음성 오디오 가이드는 src/lib/tts.ts가 처리하고, 관람 도록은 브라우저 localStorage에 저장한다.',
+  structure: [
+    { path: 'src/App.tsx', desc: '도슨트 해설·수준 전환·오디오 가이드·도록 + 메타(M)' },
+    { path: 'src/ui.tsx', desc: '공통 레이아웃·5탭·UI 헬퍼' },
+    { path: 'src/lib/ai.ts', desc: 'OpenAI chat 헬퍼(ask/hasKey)' },
+    { path: 'src/lib/tts.ts', desc: 'Web Speech 한국어 낭독 훅' },
+    { path: 'src/index.css', desc: '테마·해설/용어집 스타일' },
+  ],
+  dataModel: [
+    { name: 'Docent', desc: '요약·섹션·일화·용어·관람팁을 담은 해설 결과' },
+    { name: 'Section', desc: '해설 섹션(소제목·본문) 단위' },
+    { name: 'Glossary', desc: '용어·쉬운 풀이' },
+    { name: '관람 기록', desc: '둘러본 문화재. localStorage "heritage.visited"' },
+  ],
+  deploy:
+    'Vite 빌드(base: "./") 후 GitHub Actions(deploy.yml)가 main push 시 GitHub Pages로 자동 배포 → aebonlee.github.io/project07/',
   stack: ['React 18', 'TypeScript', 'Vite', 'OpenAI GPT', 'Web Speech API', 'localStorage'],
   links: [
     { label: '국가유산청', url: 'https://www.khs.go.kr' },
