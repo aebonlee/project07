@@ -97,6 +97,15 @@ const M: Meta = {
   ],
   deploy:
     'Vite 빌드(base: "./") 후 GitHub Actions(deploy.yml)가 main push 시 GitHub Pages로 자동 배포 → aebonlee.github.io/project07/',
+  scope: {
+    include: ['문화재 선택 → 도슨트 해설·용어·관람팁', '청중 수준 전환·TTS 오디오 가이드·도록 저장', 'AI 해설 + 키 없을 때 내장 DB 폴백'],
+    exclude: ['실시간 위치·전시 정보 연동', '공식 문화재 DB 동기화', '다국어 음성'],
+  },
+  pitch: [
+    '같은 유물을 아동/일반/전문 수준으로 다르게 설명하는 점',
+    '브라우저 음성으로 별도 기기 없이 오디오 가이드를 제공',
+    '연대·수치는 공식 자료로 교차확인 권고(정확성)',
+  ],
   stack: ['React 18', 'TypeScript', 'Vite', 'OpenAI GPT', 'Web Speech API', 'localStorage'],
   links: [
     { label: '국가유산청', url: 'https://www.khs.go.kr' },
